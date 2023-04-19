@@ -18,6 +18,11 @@ def get_close(link):
             with zip_file.open(name) as file:
                 content = file.read()
     
+    content = str(content).strip("b'\\n'")
+    print(content)
+    arr = [x.strip() for x in s.split(",")]
+    arr = [int(arr[0])] + [float(x) for x in arr[1:]]
+    
     return content
 
 if __name__ == '__main__':
