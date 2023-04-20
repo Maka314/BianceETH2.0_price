@@ -18,10 +18,12 @@ def get_close(link):
     
     content = str(content).strip("b'\\n'")
     print(content)
-    arr = [x.strip() for x in content.split(",")]
-    arr = [int(arr[0])] + [float(x) for x in arr[1:]]
+    #arr = [x.strip() for x in content.split(",")]
+    #arr = [int(arr[0])] + [float(x) for x in arr[1:]]
     
+    return content
     return arr
+
 
 if __name__ == '__main__':
     # 获取当前时间戳
@@ -29,7 +31,7 @@ if __name__ == '__main__':
     date = time.strftime('%Y-%m-%d', time.gmtime(timestamp))
     spotUrl = 'https://data.binance.vision/data/spot/daily/klines/BETHUSDT/1d/BETHUSDT-1d-%s.zip'%(date) #be like this '2023-04-19'
     futureUrl = 'https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1d/ETHUSDT-1d-%s.zip'%(date)
-    
+
     '''content = get_close(spotUrl)
     
     csv_file = pd.read_csv(fileName)
