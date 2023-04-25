@@ -4,19 +4,34 @@ from binance.um_futures import UMFutures #U-based Perpetual Contract API
 
 import configparser
 import pandas as pd
+import datetime
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 api_key, api_secret = config.get('biance_api', 'api_key'), config.get('biance_api', 'secret')
 base_url = config.get('biance_api', 'base_url')
+nv_file = config.get('local_setting', 'nv_log')
 
 spot_client = Spot(api_key=api_key, api_secret=api_secret, base_url=base_url)
 future_client = UMFutures(key=api_key, secret=api_secret)
 
-#Get the dividend record.
+'''#Get the dividend record.
 staking_record = pd.DataFrame(spot_client.asset_dividend_record(asset='BETH', limit=50)['rows'])
 spot_client.account_snapshot(type='SPOT')
 
 c_future_balance = pd.DataFrame(future_client.balance())
 spot_client.ticker_price(symbol='BETHUSDT')
-future_client.get_income_history()
+future_client.get_income_history()'''
+
+def spot_latest_hold(spot_snapshot, asset_name):
+    current_hold = pd.DataFrame(spot_snapshot['snapshotVos'][-1]['data']['balances'])
+    current_timestamp = spot_snapshot['snapshotVos'][-1]['updateTime']
+    asset_hold = current_hold[current_hold['asset'] == asset_name]
+    asset_hold['timestamp'] = pd.Series([current_timestamp]*len(asset_hold))
+    return asset_hold
+
+if __name__ == '__main__':
+    nv_data = pd.read_csv(nv_file)
+    snapshot = spot_client.account_snapshot(type='SPOT')
+    beth_held = spot_latest_hold(snapshot,'BETH')
+    pass
