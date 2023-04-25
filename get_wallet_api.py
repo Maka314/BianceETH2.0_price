@@ -15,13 +15,15 @@ nv_file = config.get('local_setting', 'nv_log')
 spot_client = Spot(api_key=api_key, api_secret=api_secret, base_url=base_url)
 future_client = UMFutures(key=api_key, secret=api_secret)
 
-'''#Get the dividend record.
+'''
+#Get the dividend record.
 staking_record = pd.DataFrame(spot_client.asset_dividend_record(asset='BETH', limit=50)['rows'])
 spot_client.account_snapshot(type='SPOT')
 
 c_future_balance = pd.DataFrame(future_client.balance())
 spot_client.ticker_price(symbol='BETHUSDT')
-future_client.get_income_history()'''
+future_client.get_income_history()
+'''
 
 def timestamp_transfer(timestamp):
     if timestamp // 1000000000000:
@@ -43,8 +45,7 @@ def future_pickup(c_future_balance, asset):
     future_timestamp = targetasset['updateTime'].values[0]
     return future_net_value, future_timestamp
 
-if __name__ == '__main__':
-    nv_data = pd.read_csv(nv_file)
+def get_the_total_value():
     snapshot = spot_client.account_snapshot(type='SPOT')
     spot_held = spot_latest_hold(snapshot,'BETH')
     spot_held['ticker_price'] = spot_client.ticker_price(symbol='BETHUSDT')['price']
@@ -52,4 +53,9 @@ if __name__ == '__main__':
 
     c_future_balance = pd.DataFrame(future_client.balance())
     future_net_value, future_timestamp = future_pickup(c_future_balance, 'USDT')
-    
+    total_value = future_net_value + spot_net_value
+    return total_value
+
+if __name__ == '__main__':
+    total_value = get_the_total_value()
+    print(total_value)
