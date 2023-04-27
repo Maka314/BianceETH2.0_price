@@ -33,10 +33,13 @@ def timestamp_transfer(timestamp):
     return("时间戳 {} 对应的时间是：{}".format(timestamp, dt))
 
 def spot_latest_hold(spot_snapshot, asset_name):
-    current_hold = pd.DataFrame(spot_snapshot['snapshotVos'][-1]['data']['balances'])
-    current_timestamp = spot_snapshot['snapshotVos'][-1]['updateTime']
+    if type(spot_snapshot) == dict:
+        current_hold = pd.DataFrame(spot_snapshot['snapshotVos'][-1]['data']['balances'])
+    else:
+        current_hold = pd.DataFrame(spot_snapshot)
+    # current_timestamp = spot_snapshot['snapshotVos'][-1]['updateTime']
     asset_hold = current_hold[current_hold['asset'] == asset_name]
-    asset_hold['timestamp'] = pd.Series([current_timestamp]*len(asset_hold))
+    # asset_hold['timestamp'] = pd.Series([current_timestamp]*len(asset_hold))
     return asset_hold
 
 def future_pickup(c_future_balance, asset):
@@ -46,7 +49,7 @@ def future_pickup(c_future_balance, asset):
     return future_net_value, future_timestamp
 
 def get_the_total_value():
-    snapshot = spot_client.account_snapshot(type='SPOT')
+    snapshot = spot_client.account_snapshot(type='SPOT',limit = 30)
     spot_held = spot_latest_hold(snapshot,'BETH')
     spot_held['ticker_price'] = spot_client.ticker_price(symbol='BETHUSDT')['price']
     spot_net_value = float(spot_held['free'][0])*float(spot_held['ticker_price'][0])
@@ -54,8 +57,22 @@ def get_the_total_value():
     c_future_balance = pd.DataFrame(future_client.balance())
     future_net_value, future_timestamp = future_pickup(c_future_balance, 'USDT')
     total_value = future_net_value + spot_net_value
-    return total_value
+    return total_value, future_timestamp
+
+def get_the_total_value_v2():
+    snapshot = spot_client.user_asset()
+    spot_held = spot_latest_hold(snapshot,'BETH')
+    spot_held['ticker_price'] = spot_client.ticker_price(symbol='BETHUSDT')['price']
+    spot_net_value = float(spot_held['free'][0])*float(spot_held['ticker_price'][0])
+
+    c_future_balance = pd.DataFrame(future_client.balance())
+    future_net_value, future_timestamp = future_pickup(c_future_balance, 'USDT')
+    total_value = future_net_value + spot_net_value
+    return total_value, future_timestamp
 
 if __name__ == '__main__':
-    total_value = get_the_total_value()
-    print(total_value)
+    total_value, current_timestamp = get_the_total_value_v2()
+    new_data = {'timestamp':current_timestamp, 'total_netvalue':total_value}
+    logfile = pd.read_csv( config.get('local_setting', 'nv_log') )
+    logfile.loc[len(logfile)] = new_data
+    logfile.to_csv( config.get('local_setting', 'nv_log'),index=False)
