@@ -66,13 +66,14 @@ def get_the_total_value_v2():
     spot_net_value = float(spot_held['free'][0])*float(spot_held['ticker_price'][0])
 
     c_future_balance = pd.DataFrame(future_client.balance())
-    future_net_value, future_timestamp = future_pickup(c_future_balance, 'USDT')
+    future_net_value, future_update_timestamp = future_pickup(c_future_balance, 'USDT')
+    current_timestamp = future_client.time()['serverTime']
     total_value = future_net_value + spot_net_value
-    return total_value, future_timestamp
+    return total_value, current_timestamp
 
 if __name__ == '__main__':
     total_value, current_timestamp = get_the_total_value_v2()
     new_data = {'timestamp':current_timestamp, 'total_netvalue':total_value}
     logfile = pd.read_csv( config.get('local_setting', 'nv_log') )
     logfile.loc[len(logfile)] = new_data
-    logfile.to_csv( config.get('local_setting', 'nv_log'),index=False)
+    logfile.to_csv(config.get('local_setting', 'nv_log'), index=False)
