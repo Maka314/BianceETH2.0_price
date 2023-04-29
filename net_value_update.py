@@ -75,6 +75,11 @@ def get_fa_funding_fee_selection(client, p_time, q_time):
     cutted_data = fee_history[(fee_history['time']>p_time) & (fee_history['time']<q_time)]
     return cutted_data
 
+def constructor(spot_client, future_client, latest_timestamp):
+    #wip
+    pass
+
+
 if __name__ == '__main__':
     logfile = pd.read_csv( config.get('local_setting', 'nv_log') )
     current_timestamp, latest_timestamp =server_time(spot_client), max(logfile['timestamp'])
