@@ -96,3 +96,4 @@ if __name__ == '__main__':
 
     logfile.loc[len(logfile)] = new_data
     logfile.to_csv(config.get('local_setting', 'nv_log'), index=False)
+    pass
